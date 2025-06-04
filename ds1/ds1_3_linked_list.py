@@ -1,3 +1,6 @@
+import exceptions as exc
+
+
 class LinkedList:
 
     class _Node:
@@ -33,7 +36,7 @@ class LinkedList:
 
     def delete_first(self) -> None:
         if self.is_empty():
-            return
+            raise exc.IsEmptyException("Nothing to delete")
         if self._first == self._last:  # only one list item so delete it immediately
             self._first = self._last = None
         else:
@@ -42,7 +45,7 @@ class LinkedList:
 
     def delete_last(self) -> None:
         if self.is_empty():
-            return
+            raise exc.IsEmptyException("Nothing to delete")
         if self._first == self._last:  # only one list item so delete it immediately
             self._first = self._last = None
         else:
@@ -96,6 +99,36 @@ class LinkedList:
         self._last = self._first
         self._first = one
 
+    def get_kth_from_the_end(self, k: int) -> int:
+        if self.is_empty():
+            raise exc.IsEmptyException("List is empty")
+
+        one = two = self._first
+        for _ in range(k-1):  # move pointer two, k-1 nodes away
+            two = two.next
+            if not two:
+                raise exc.IllegalArgumentException("k is greater than the size of the list")
+
+        while two != self._last:
+            two = two.next
+            one = one.next
+        return one.item
+
+    def print_middle(self) -> None:
+        if self.is_empty():
+            raise exc.IsEmptyException("List is empty")
+
+        one = self._first
+        two = one.next
+        while two and two.next:
+            one = one.next
+            two = two.next.next
+
+        if two == self._last:
+            print(f"[{one.item}, {one.next.item}]")
+        else:
+            print(one.item)
+
 
 
 def main() -> None:
@@ -120,7 +153,6 @@ def main() -> None:
     print(ll.contains(30))
     print(ll.to_array())
     ll.delete_last()
-    ll.delete_first()
     print(ll.to_array())
     ll.add_last(40)
     ll.add_last(50)
@@ -131,7 +163,8 @@ def main() -> None:
     print(ll.to_array())
     ll.reverse()
     print(ll.to_array())
-
+    ll.print_middle()
+    print(ll.get_kth_from_the_end(2))
 
 if __name__ == "__main__":
     main()

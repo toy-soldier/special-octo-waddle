@@ -19,7 +19,7 @@ class Array:
     def max(self) -> int:
         if len(self._lst) == 0:
             return -1
-        return max(*self._lst)
+        return max(self._lst)
 
     def intersect(self, other: list[int]) -> list[int]:
         common = []
