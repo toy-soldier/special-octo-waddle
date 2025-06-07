@@ -2,7 +2,7 @@ import ds1_5_queue as queue
 import exceptions as exc
 
 
-class CircularArrayQueue(queue.Queue):
+class PriorityQueue(queue.Queue):
 
     def __init__(self, capacity: int):
         super().__init__()
@@ -12,13 +12,21 @@ class CircularArrayQueue(queue.Queue):
     def enqueue(self, value: int) -> None:
         if self.is_full():
             raise exc.IsFullException("Queue is full")
-
-        self._rear = (self._rear + 1) % len(self._array)
-        self._array[self._rear] = value
-        self._count += 1
-
-        if self._count == 1:
+        if self.is_empty():
+            self._rear = (self._rear + 1) % len(self._array)
+            self._array[self._rear] = value
             self._front = self._rear
+        else:
+            sz = len(self._array)  # since the array is circular, indices have to be modulo of array size
+            i = self._rear
+            if i < self._front:
+                i += sz
+            while i >= self._front and self._array[i % sz] > value:
+                self._array[(i + 1) % sz] = self._array[i % sz]
+                i -= 1
+            self._array[(i + 1) % sz] = value
+            self._rear = (self._rear + 1) % sz
+        self._count += 1
 
     def dequeue(self) -> int:
         value = self.peek()
@@ -46,16 +54,19 @@ class CircularArrayQueue(queue.Queue):
 
 
 def main() -> None:
-    q = CircularArrayQueue(3)
-    q.enqueue(10)
-    q.enqueue(20)
-    q.dequeue()
+    q = PriorityQueue(3)
     q.enqueue(40)
-    q.enqueue(50)
+    q.enqueue(20)
+    q.enqueue(30)
+    q.dequeue()
+    q.enqueue(90)
+    q.dequeue()
+    q.enqueue(10)
     q.dequeue()
     q.dequeue()
     q.dequeue()
     q.enqueue(60)
+    q.enqueue(50)
     print()
 
 
