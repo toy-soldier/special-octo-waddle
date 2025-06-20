@@ -121,9 +121,8 @@ class Graph:
         cycle = []
         for vertex in self._vertices.values():
             path = {vertex.label: None}
-            self._has_cycle(vertex, visiting, visited, path)
-            if len(visiting) > 0:
-                dest = visiting.pop().label
+            if self._has_cycle(vertex, visiting, visited, path):
+                dest = path["cycle@"]
                 while dest:
                     cycle.append(dest)
                     dest = path[dest]
@@ -132,18 +131,20 @@ class Graph:
         return False
 
     def _has_cycle(self, node: _Node, visiting: set[_Node], visited: set[_Node],
-                   path: dict[str, str | None]) -> None:
-        if node in visited:
-            return
+                   path: dict[str, str | None]) -> bool:
         visiting.add(node)
         for neighbor in self._edges[node]:
-            if neighbor not in visiting:
-                path[neighbor.label] = node.label
-                self._has_cycle(neighbor, visiting, visited, path)
-            else:
-                return
+            if neighbor in visited:
+                continue
+            if neighbor in visiting:
+                path["cycle@"] = node.label
+                return True
+            path[neighbor.label] = node.label
+            if self._has_cycle(neighbor, visiting, visited, path):
+                return True
         visiting.remove(node)
         visited.add(node)
+        return False
 
 
 def main() -> None:
@@ -175,9 +176,8 @@ def main() -> None:
     g.add_edge("D", "A")
     g.add_edge("A", "B")
     g.add_edge("B", "C")
-    g.add_edge("C", "A")
-    a = g.has_cycle()
-    print()
+    g.add_edge("A", "C")
+    print(f"{g.has_cycle()=}")
 
 
 if __name__ == '__main__':
