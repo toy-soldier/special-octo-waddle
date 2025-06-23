@@ -107,6 +107,39 @@ class WeightedGraph:
             dest_node = nodes_table[dest_node][1]
         return f"Shortest path from {src} to {dest} is {'->'.join(path[::-1])} ({weight=})"
 
+    def has_cycle(self) -> bool:
+        visited = set()
+        node_table = {}
+        for vertex in self._vertices.values():
+            if vertex in visited:
+                continue
+            node_table[vertex.label] = None
+            result = self._has_cycle(vertex, None, visited, node_table)
+            if result:
+                path = []
+                dest = node_table["cycle@"]
+                while dest:
+                    path.append(dest)
+                    dest = node_table[dest]
+                print(f"Cycle detected at {'->'.join(path[::-1])}")
+                return result
+        return False
+
+    def _has_cycle(self, current: _Node, parent: _Node | None, visited: set[_Node],
+                   node_table: dict[str, str | None]) -> bool:
+        visited.add(current)
+        for edge in current.get_edges():
+            neighbor = edge.dest
+            if neighbor == parent:
+                continue
+            if neighbor in visited:
+                node_table["cycle@"] = current.label
+                return True
+            node_table[neighbor.label] = current.label
+            if self._has_cycle(neighbor, current, visited, node_table):
+                return True
+        return False
+
 
 
 def main() -> None:
@@ -121,6 +154,13 @@ def main() -> None:
     g.add_edge("E", "B", 1)
     g.add_edge("E", "D", 5)
     a = g.shortest_path("A", "E")
+    g = WeightedGraph()
+    for label in "A", "B", "C":
+        g.add_node(label)
+    g.add_edge("A", "B", 3)
+    g.add_edge("B", "C", 2)
+    g.add_edge("C", "A", 2)
+    a = g.has_cycle()
     print()
 
 
