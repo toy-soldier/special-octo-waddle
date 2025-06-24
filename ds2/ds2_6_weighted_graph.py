@@ -32,15 +32,20 @@ class WeightedGraph:
             self.node = node
             self.priority = priority
 
+    class _EdgeEntry:
+        def __init__(self, edge: "WeightedGraph._Edge", priority: int):
+            self.edge = edge
+            self.priority = priority
+
     class _PriorityQueue:
         def __init__(self):
             self.queue = []
 
-        def enqueue(self, node_entry: "WeightedGraph._NodeEntry") -> None:
-            self.queue.append(node_entry)
+        def enqueue(self, entry: "WeightedGraph._NodeEntry | WeightedGraph._EdgeEntry") -> None:
+            self.queue.append(entry)
             self.queue.sort(key=lambda item: item.priority)
 
-        def dequeue(self) -> "WeightedGraph._NodeEntry":
+        def dequeue(self) -> "WeightedGraph._NodeEntry | WeightedGraph._EdgeEntry":
             return self.queue.pop(0)
 
         def is_empty(self) -> bool:
@@ -140,14 +145,42 @@ class WeightedGraph:
                 return True
         return False
 
+    def get_minimum_spanning_tree(self) -> Self:
+        spanning_tree = WeightedGraph()
+        queue = self._PriorityQueue()
+
+        if len(self._vertices) == 0:
+            return spanning_tree
+
+        beginning_node = list(self._vertices.values())[0]
+        spanning_tree.add_node(beginning_node.label)
+        for edge in beginning_node.get_edges():
+            queue.enqueue(self._EdgeEntry(edge, priority=edge.weight))
+
+        while len(spanning_tree._vertices) != len(self._vertices) and not queue.is_empty():
+            min_edge = queue.dequeue().edge
+            src = min_edge.src
+            dest = min_edge.dest
+
+            if dest.label in spanning_tree._vertices:
+                continue
+
+            spanning_tree.add_node(dest.label)
+            spanning_tree.add_edge(src.label, dest.label, edge.weight)
+
+            for edge in dest.get_edges():
+                if edge.dest.label not in spanning_tree._vertices:
+                    queue.enqueue(self._EdgeEntry(edge, priority=edge.weight))
+
+        return spanning_tree
 
 
 def main() -> None:
     g = WeightedGraph()
     for label in "A", "B", "C", "D", "E":
         g.add_node(label)
-    g.add_edge("A", "B", 3)
     g.add_edge("A", "D", 2)
+    g.add_edge("A", "B", 3)
     g.add_edge("A", "C", 4)
     g.add_edge("D", "B", 6)
     g.add_edge("D", "C", 1)
@@ -161,6 +194,7 @@ def main() -> None:
     g.add_edge("B", "C", 2)
     g.add_edge("C", "A", 2)
     a = g.has_cycle()
+    a = g.get_minimum_spanning_tree()
     print()
 
 
