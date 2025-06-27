@@ -8,7 +8,7 @@ def timer(func: Callable[["Sort"], None]):
         start = time.time()
         res = func(self, *args, **kwargs)
         duration = time.time() - start
-        print(f"Method {func.__name__}() took {duration:.6f}s")
+        print(f"Method {self.__class__.__name__}.{func.__name__}() took {duration:.6f}s")
         return res
     return wrapper
 
@@ -23,6 +23,8 @@ class Sort(abc.ABC):
         pass
 
     def swap(self, index1: int, index2: int) -> None:
+        if index1 == index2:
+            return
         temp = self.lst[index1]
         self.lst[index1] = self.lst[index2]
         self.lst[index2] = temp
